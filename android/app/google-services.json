@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "451942244187",
+    "firebase_url": "https://authentication-portfolio-default-rtdb.firebaseio.com",
     "project_id": "authentication-portfolio",
     "storage_bucket": "authentication-portfolio.appspot.com"
   },
@@ -29,6 +30,13 @@
             {
               "client_id": "451942244187-afud6lmll1fos0jht81pj74pk57nmiov.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "451942244187-05hh4d1rudej6juho4qhmoc8snjlcq4l.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.authentication.RunnerTests"
+              }
             }
           ]
         }

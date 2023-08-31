@@ -54,6 +54,7 @@ class DefaultFirebaseOptions {
     appId: '1:451942244187:android:f96bbf3d78f66d492ec47e',
     messagingSenderId: '451942244187',
     projectId: 'authentication-portfolio',
+    databaseURL: 'https://authentication-portfolio-default-rtdb.firebaseio.com',
     storageBucket: 'authentication-portfolio.appspot.com',
   );
 
@@ -62,6 +63,7 @@ class DefaultFirebaseOptions {
     appId: '1:451942244187:ios:8b77895952f319b62ec47e',
     messagingSenderId: '451942244187',
     projectId: 'authentication-portfolio',
+    databaseURL: 'https://authentication-portfolio-default-rtdb.firebaseio.com',
     storageBucket: 'authentication-portfolio.appspot.com',
     iosClientId: '451942244187-pe453i7a0ljisc97skk1v9br9a91mlpq.apps.googleusercontent.com',
     iosBundleId: 'com.example.authentication',
