@@ -12,6 +12,8 @@ class AuthScreen extends StatefulWidget {
 class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Hello')));
+    return Scaffold(appBar: AppBar(
+      title: const Text('User Authentication'),
+    ),);
   }
 }
