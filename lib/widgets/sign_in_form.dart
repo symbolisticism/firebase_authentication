@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final _firebase = FirebaseAuth.instance;
 
 class SignInForm extends StatefulWidget {
   const SignInForm({super.key});
@@ -8,6 +11,7 @@ class SignInForm extends StatefulWidget {
 }
 
 class _SignInFormState extends State<SignInForm> {
+  // PROPERTIES
   // form key for form validation
   final _formKey = GlobalKey<FormState>();
   // text editing controllers
@@ -19,6 +23,17 @@ class _SignInFormState extends State<SignInForm> {
   String _enteredPassword = '';
   // boolean to switch between sign up and log in modes
   bool _isSigningIn = true;
+
+  // METHODS
+  void submit() async {
+    final isValid = _formKey.currentState!.validate();
+
+    if (!isValid) return;
+
+    _formKey.currentState!.save();
+
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +58,7 @@ class _SignInFormState extends State<SignInForm> {
                 _enteredUsername = value!; // already checked for null
               },
             ),
-            const SizedBox(height: 24),
+          const SizedBox(height: 24),
           TextFormField(
             autocorrect: false,
             keyboardType: TextInputType.name,
@@ -92,43 +107,27 @@ class _SignInFormState extends State<SignInForm> {
                     );
                   }
                 },
-                child: _isSigningIn ? const Text('Log In') : const Text('Sign Up'),
+                child:
+                    Text(_isSigningIn ? 'Log In' : 'Sign Up'),
               ),
             ],
           ),
           const SizedBox(height: 36),
           // button to switch to sign up mode
-          if (_isSigningIn)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Don\'t have an account?'),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isSigningIn = false;
-                    });
-                  },
-                  child: const Text('Sign Up'),
-                ),
-              ],
-            ),
-          // button to switch to sign in mode
-          if (!_isSigningIn)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Already have an account?'),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      _isSigningIn = true;
-                    });
-                  },
-                  child: const Text('Log In'),
-                ),
-              ],
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_isSigningIn ? 'Don\'t have an account?' : 'Already have an account?'),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _isSigningIn = !_isSigningIn;
+                  });
+                },
+                child: Text(_isSigningIn ? 'Sign Up' : 'Log In'),
+              ),
+            ],
+          ),
         ],
       ),
     );
