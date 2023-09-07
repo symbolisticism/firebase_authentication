@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:firebase_database/firebase_database.dart';
 
 final _firebaseAuth = FirebaseAuth.instance;
 final _firebaseFirestore = FirebaseFirestore.instance;
@@ -21,12 +19,11 @@ class _SignInFormState extends State<SignInForm> {
   // text editing controllers
   final _username = TextEditingController();
   final _password = TextEditingController();
-  final _fullName = TextEditingController();
   // variables to hold final values of text inputs
   String _enteredUsername = '';
   String _enteredPassword = '';
   // boolean to switch between sign up and log in modes
-  bool _isSigningIn = true;
+  bool _isLogin = true;
   bool _isAuthenticating = false;
 
   // METHODS
@@ -36,64 +33,32 @@ class _SignInFormState extends State<SignInForm> {
     if (!isValid) return;
 
     _formKey.currentState!.save();
-
     try {
-      setState(() {
-        _isAuthenticating = true;
-      });
-
-      if (_isSigningIn) {
+      if (_isLogin) {
         final userCredentials = await _firebaseAuth.signInWithEmailAndPassword(
             email: _enteredUsername, password: _enteredPassword);
+        print(userCredentials);
       } else {
         final userCredentials =
             await _firebaseAuth.createUserWithEmailAndPassword(
                 email: _enteredUsername, password: _enteredPassword);
-
-        final user = <String, String>{
-          "username": _enteredUsername,
-          "password": _enteredPassword,
-        };
-
-        await _firebaseFirestore.collection('users').add(user);
+        print(userCredentials);
       }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('An account already exists for that email')
-      }
-
-      setState(() {
-        _isAuthenticating = false;
-      });
-    } catch (e) {
-      print(e);
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'Authentication Failed'),
+        ),
+      );
     }
   }
 
-  void login() {
-    final isValid = _formKey.currentState!.validate();
-
-    if (!isValid) return;
-
-    _formKey.currentState!.save();
-
-    try {
-      setState(() {
-        _isAuthenticating = true;
-      });
-
-      if (_isSigningIn) {
-        signExistingUserIn();
-      } else {
-        signNewUserIn();
-      }
-    } on FirebaseAuthException catch (e) {
-      print(e.code);
-    } catch (e) {
-      print(e);
-    }
+  @override
+  void dispose() {
+    _username.dispose();
+    _password.dispose();
+    super.dispose();
   }
 
   @override
@@ -102,24 +67,6 @@ class _SignInFormState extends State<SignInForm> {
       key: _formKey,
       child: Column(
         children: [
-          // full name input
-          if (!_isSigningIn)
-            TextFormField(
-              autocorrect: false,
-              keyboardType: TextInputType.name,
-              controller: _fullName,
-              decoration: const InputDecoration(labelText: 'Full Name'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a valid name';
-                }
-                return null;
-              },
-              onSaved: (value) {
-                _enteredUsername = value!; // already checked for null
-              },
-            ),
-          const SizedBox(height: 24),
           TextFormField(
             autocorrect: false,
             keyboardType: TextInputType.name,
@@ -166,7 +113,7 @@ class _SignInFormState extends State<SignInForm> {
                           submit();
                         }
                       },
-                      child: Text(_isSigningIn ? 'Log In' : 'Sign Up'),
+                      child: Text(_isLogin ? 'Log In' : 'Sign Up'),
                     ),
                   ],
                 ),
@@ -176,16 +123,16 @@ class _SignInFormState extends State<SignInForm> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(_isSigningIn
+                    Text(_isLogin
                         ? 'Don\'t have an account?'
                         : 'Already have an account?'),
                     TextButton(
                       onPressed: () {
                         setState(() {
-                          _isSigningIn = !_isSigningIn;
+                          _isLogin = !_isLogin;
                         });
                       },
-                      child: Text(_isSigningIn ? 'Sign Up' : 'Log In'),
+                      child: Text(_isLogin ? 'Sign Up' : 'Log In'),
                     ),
                   ],
                 ),
