@@ -19,7 +19,7 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: const Center(
-        child: Text('Home Screen'),
+        child: Text('Logged In!', style: TextStyle(fontSize: 48),),
       ),
     );
   }
