@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_database/firebase_database.dart';
 
-final _firebase = FirebaseAuth.instance;
+final _firebaseAuth = FirebaseAuth.instance;
+final _firebaseFirestore = FirebaseFirestore.instance;
 
 class SignInForm extends StatefulWidget {
   const SignInForm({super.key});
@@ -39,15 +43,57 @@ class _SignInFormState extends State<SignInForm> {
       });
 
       if (_isSigningIn) {
-        final userCredentials = await _firebase.signInWithEmailAndPassword(
+        final userCredentials = await _firebaseAuth.signInWithEmailAndPassword(
             email: _enteredUsername, password: _enteredPassword);
       } else {
-        final userCredentials = await _firebase.createUserWithEmailAndPassword(
-            email: _enteredUsername, password: _enteredPassword);
+        final userCredentials =
+            await _firebaseAuth.createUserWithEmailAndPassword(
+                email: _enteredUsername, password: _enteredPassword);
+
+        final user = <String, String>{
+          "username": _enteredUsername,
+          "password": _enteredPassword,
+        };
+
+        await _firebaseFirestore.collection('users').add(user);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('An account already exists for that email')
       }
 
-      
-    } catch (e) {}
+      setState(() {
+        _isAuthenticating = false;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  void login() {
+    final isValid = _formKey.currentState!.validate();
+
+    if (!isValid) return;
+
+    _formKey.currentState!.save();
+
+    try {
+      setState(() {
+        _isAuthenticating = true;
+      });
+
+      if (_isSigningIn) {
+        signExistingUserIn();
+      } else {
+        signNewUserIn();
+      }
+    } on FirebaseAuthException catch (e) {
+      print(e.code);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
@@ -126,26 +172,26 @@ class _SignInFormState extends State<SignInForm> {
                 ),
               const SizedBox(height: 36),
               // button to switch to sign up mode
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(_isSigningIn
-                      ? 'Don\'t have an account?'
-                      : 'Already have an account?'),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        _isSigningIn = !_isSigningIn;
-                      });
-                    },
-                    child: Text(_isSigningIn ? 'Sign Up' : 'Log In'),
-                  ),
-                ],
-              ),
+              if (!_isAuthenticating)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(_isSigningIn
+                        ? 'Don\'t have an account?'
+                        : 'Already have an account?'),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _isSigningIn = !_isSigningIn;
+                        });
+                      },
+                      child: Text(_isSigningIn ? 'Sign Up' : 'Log In'),
+                    ),
+                  ],
+                ),
               if (_isAuthenticating) const CircularProgressIndicator(),
             ],
           ),
-          // button to send user info to backend, verify, and log in
         ],
       ),
     );
